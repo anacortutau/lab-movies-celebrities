@@ -43,6 +43,9 @@ router.post("/create", (req, res, next)=>{
     })
 })
 
+
+
+
 router.get("/",(req, res, next)=>{
 
     MovieModel.find()
@@ -71,13 +74,76 @@ router.get("/:id", (req, res, next)=>{
             movie
         })
 
-        .catch((err)=>{
-            next(err)
-        })
+        
+    })
+
+    .catch((err)=>{
+        next(err)
     })
 
 
 })
+
+router.post("/:id/delete", async (req, res, next) => {
+    const { id } = req.params
+ 
+    try {
+      // 1 recibir la info a borrar
+      await MovieModel.findByIdAndRemove(id)
+ 
+      // 2 a dónde mandas al usuario??
+      res.redirect("/movies")     
+ 
+    } catch(err) {
+      next(err)
+    }
+ });
+
+ router.get("/:id/edit", async (req, res,next)=>{
+
+    const {id} = req.params;
+
+    try{
+
+      const movie = await MovieModel.findById(id)
+
+      const allCelebrities = await CelebrityModel.find().select("name")
+
+      res.render("movies/edit-movie.hbs", {
+        movie,
+        allCelebrities
+      })
+
+    }catch(err){
+      next(err)
+    }
+  })
+
+  router.post("/:id/edit", (req, res, next)=>{
+
+   
+    const {title, genre, plot, cast} = req.body
+    const{id} = req.params
+    
+    
+    MovieModel.findByIdAndUpdate(id, {
+        title, 
+        genre, 
+        plot,
+        cast
+    })
+    .then((movie)=>{
+
+         res.redirect(`/movies`)
+
+    })
+    .catch((err)=>{
+        next(err)
+    })
+
+})
+
+
 
 
 
